@@ -4,19 +4,19 @@ import { observer } from 'mobx-react';
 import { style } from 'typestyle';
 import i18n from 'es2015-i18n-tag';
 import { types, IType } from 'mobx-state-tree';
-
-import { IModelType } from "mobx-state-tree/lib/types/complex-types/object";
-import { ISnapshottable } from "mobx-state-tree/lib/types/type";
-import { IMSTNode } from "mobx-state-tree/lib/core";
 import { FormComponent, FormGroupProps, Form as SUIForm, Label as SUILabel, Input as SuiInput, FormInputProps, FormSelectProps, FormRadioProps, FormTextAreaProps, FormFieldProps } from 'semantic-ui-react';
-
 import DatePickerView from 'react-datepicker';
+
+import { ISnapshottable } from 'mobx-state-tree/dist/types/type';
+import { IModelType } from 'mobx-state-tree/dist/types/complex-types/object';
 
 export { Form as SUIForm } from 'semantic-ui-react';
 
 export const Form = SUIForm;
 export const Field = SUIForm.Field;
 export const Group = SUIForm.Group;
+
+let g: IModelType;
 
 const errorStyle = style({
   marginTop: '3px!important'
@@ -33,29 +33,47 @@ export interface FormEvent {
 
 export type Validator = (value: string | number) => string;
 
+export interface Field<T> {
+  value: T;
+  message: string;
+  hasError: boolean;
+  validators: Validator[];
+  validate(): string;
+  onChange(value: string | number | boolean): void;
+  isValid(): boolean;
+}
 
 export const FieldModel = types.model(
   "FormField",
   {
-    value: '',
-    message: '',
+    value: types.optional(types.string, ''),
+    message: types.optional(types.string, ''),
     hasError: false,
     validators: types.frozen as IType<Validator[], Validator[]>
   },
   {
     validate(): string {
+      if (!this.validators) {
+        return null;
+      }
+      if (this.message) {
+        this.message = '';
+      }
       for (let validator of this.validators) {
         let message = validator(this.value);
         if (message) {
           this.hasError = true;
+          this.message = message;
           return message;
         }
       }
-      this.hasError = false;
+      if (this.hasError) {
+        this.hasError = false;
+      }
       return null;
     },
     onChange(value: string | number | boolean) {
-      this.value = value ? value.toString() : '';
+      this.value = value != null ? value.toString() : '';
       this.validate();
     },
     isValid() {
@@ -75,7 +93,7 @@ function validateField(field: any) {
 }
 
 export function validate(model: any): string {
-  for (let name in Object.getOwnPropertyNames(model)) {
+  for (let name of Object.getOwnPropertyNames(model)) {
     if (Array.isArray(model[name])) {
       for (let i in model[name]) {
         let message = validateField(model[name][i]);
@@ -363,6 +381,15 @@ function isNonZeroFloat(n: string) {
   return nonZeroFloatReg.test(n);
 }
 
+const emailReg = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+function isEmail(n: string) {
+  return emailReg.test(n);
+}
+
+export function emailValidator(value: string) {
+  return value == null || value === '' || isEmail(value) ? '' : i18n`Email has incorrect format!`;
+}
+
 export function intPositiveValidator(value: number | string) {
   return value == null || value === '' || isPositiveInt(value.toString()) ? '' : i18n`Expected positive integer value`;
 }
@@ -387,6 +414,21 @@ export function floatNonZeroValidator(value: number | string) {
   return value == null || value === '' || isNonZeroFloat(value.toString()) ? '' : i18n`Expected non-zero float value`;
 }
 
+export function lengthValidator(length: number, message?: string) {
+  return (value: number | string) => {
+    return value == null || value === '' || value.toString().length >= length ? '' : (message || i18n`Too short! Minimum ${length} characters`);
+  }
+}
+
+export function equalityValidator(comparer: () => string | string, message?: string) {
+  return (value: string) => {
+    let val1 = value ? value.toString() : value.toString();  
+    let val2 = typeof comparer === "function" ? comparer() : comparer;
+    
+    return val1 === val2 ? '' : (message || i18n`Value ${val1} does not match ${val2}`);
+  }
+}
+
 // field constructors
 
 export function requiredField(value: any, validators?: Validator[]) {
@@ -398,7 +440,3 @@ export function simpleField(value: any, validators?: Validator[]) {
   validators = [].concat(validators || []);
   return types.optional(FieldModel, { validators });
 }
-
-
-
-
