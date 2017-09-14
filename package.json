@@ -1,6 +1,6 @@
 {
   "name": "semantic-ui-mobx",
-  "version": "1.1.14",
+  "version": "1.1.15",
   "description": "Semantic UI elements controlled with mobx-state-tree",
   "main": "dist/index.js",
   "scripts": {
