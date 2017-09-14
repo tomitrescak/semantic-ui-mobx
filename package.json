@@ -1,6 +1,6 @@
 {
   "name": "semantic-ui-mobx",
-  "version": "0.0.24",
+  "version": "1.1.14",
   "description": "Semantic UI elements controlled with mobx-state-tree",
   "main": "dist/index.js",
   "scripts": {
@@ -30,11 +30,10 @@
     "@types/react-datepicker": "0.x.x",
     "es2015-i18n-tag": "1.x.x",
     "mobx-react": "4.x.x",
-    "mobx-state-tree": "0.x.x",
     "moment": "^2.18.1",
     "react": "^15.x.x",
     "react-datepicker": "0.x.x",
-    "semantic-ui-react": "0.x.x",
+    "semantic-ui-react": "^0.71.4",
     "tslib": "1.x.x",
     "typestyle": "1.x.x"
   }
