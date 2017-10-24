@@ -1,6 +1,6 @@
 {
   "name": "semantic-ui-mobx",
-  "version": "1.1.16",
+  "version": "1.2.9",
   "description": "Semantic UI elements controlled with mobx-state-tree",
   "main": "dist/index.js",
   "scripts": {
@@ -22,19 +22,21 @@
     "url": "https://github.com/tomitrescak/semantic-ui-mobx/issues"
   },
   "homepage": "https://github.com/tomitrescak/semantic-ui-mobx#readme",
+  "dependencies": {
+    "moment": "^2.18.1",
+    "react-datepicker": "^0.55.0"
+  },
   "devDependencies": {
     "@types/react": "^15.0.24",
-    "mobx": "^3.2.2"
-  },
-  "dependencies": {
-    "@types/react-datepicker": "0.x.x",
-    "es2015-i18n-tag": "1.x.x",
-    "mobx-react": "4.x.x",
+    "@types/react-datepicker": "^0.55.0",
+    "es2015-i18n-tag": "^1.1.6",
+    "graphql-tag": "^2.5.0",
+    "mobx": "^3.2.2",
+    "mobx-react": "^4.3.2",
     "moment": "^2.18.1",
-    "react": "^15.x.x",
-    "react-datepicker": "0.x.x",
-    "semantic-ui-react": "^0.71.4",
-    "tslib": "1.x.x",
-    "typestyle": "1.x.x"
+    "react": "^16.0.0",
+    "semantic-ui-react": "^0.74.2",
+    "tslib": "^1.7.1",
+    "typestyle": "^1.4.1"
   }
 }
