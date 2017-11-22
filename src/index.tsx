@@ -15,7 +15,8 @@ import {
   FormRadioProps,
   FormTextAreaProps,
   FormFieldProps,
-  Dropdown
+  Dropdown,
+  CheckboxProps
 } from 'semantic-ui-react';
 
 import DatePickerView from 'react-datepicker';
@@ -237,7 +238,7 @@ export class FieldCollection<T> {
   listeners: FormStateListener[];
 
   constructor(array: T[], ...validators: Validator[]) {
-    this.array = [...array];
+    this.array = observable([...array]);
     this.validators = validators;
     this.fields = observable([]);
     for (let i=0; i<array.length; i++) {
@@ -287,11 +288,13 @@ export class FieldCollection<T> {
 
 export class FieldModel<T = any> {
   @observable message = '';
-  hasError: boolean = false;
+  @observable hasError: boolean = false;
+
   validators: Validator[] = [];
   store: Owner ;
   key: string | number = '';
-  listeners: FormStateListener[];
+  
+  private _listeners: FormStateListener[];
 
   constructor(owner: Owner | T[], key: string | number, validators: Validator[] = []) {
     this.store = owner as Owner;
@@ -303,8 +306,19 @@ export class FieldModel<T = any> {
     }
   }
 
+  get listeners() {
+    if (!this._listeners) {
+      this._listeners = [];
+    }
+    return this._listeners;
+  }
+
+  addListener(listener: FormStateListener) {
+    this.listeners.push(listener);
+  }
+
   listen(listeners: FormStateListener[]) {
-    this.listeners = listeners;
+    this._listeners = this.listeners.concat(listeners);
   }
 
   get value(): T {
@@ -323,8 +337,8 @@ export class FieldModel<T = any> {
       (this.store as any)[this.key] = value;
     }
 
-    if (this.listeners) {
-      this.listeners.forEach(l => l(this, originalValue, value));
+    if (this._listeners) {
+      this._listeners.forEach(l => l(this, originalValue, value));
     }
   }
 
@@ -455,7 +469,7 @@ export interface FormElement {
   validators?: Validator[];
 }
 
-export class FormControl<P, T> extends React.Component<P & FormElement, {}> {
+export class FormControl<P> extends React.Component<P & FormElement> {
   owner: FieldModel;
 
   constructor(props: FormElement) {
@@ -500,7 +514,7 @@ const ErrorLabel = ({ owner }: ErrorProps) =>
   </SUILabel>;
 
 @observer
-export class Input extends FormControl<FormInputProps, any> {
+export class Input extends FormControl<FormInputProps> {
   render() {
     // console.log('Rendering: ' + this.value);
     let { label, className, owner, ...rest } = this.props;
@@ -520,7 +534,7 @@ export class Input extends FormControl<FormInputProps, any> {
 Input.displayName = 'MobxInput';
 
 @observer
-export class TextArea extends FormControl<FormTextAreaProps, {}> {
+export class TextArea extends FormControl<FormTextAreaProps> {
   render() {
     let { label, className, owner, ...rest } = this.props;
     return (
@@ -578,7 +592,7 @@ interface State {
 }
 
 @observer
-export class DatePicker extends FormControl<FormInputProps & DateProps, {}> {
+export class DatePicker extends FormControl<FormInputProps & DateProps> {
   static defaultProps = {
     format: 'DD MMM YYYY'
   };
@@ -632,7 +646,7 @@ export const Label = (props: FormFieldProps & LabelProps) => {
 Label.displayName = 'MobxBoundLabel';
 
 @observer
-export class Select extends FormControl<FormSelectProps, {}> {
+export class Select extends FormControl<FormSelectProps> {
   updateSelect = (_e: any, selectValue: { name: string; value: any }) => {
     // this.props.owner.value = selectValue.value;
     this.owner.onChange(selectValue.value);
@@ -657,30 +671,32 @@ export class Select extends FormControl<FormSelectProps, {}> {
 Select.displayName = 'MobxBoundSelect';
 
 @observer
-export class Radio extends FormControl<FormRadioProps, {}> {
-  update = (e: React.SyntheticEvent<HTMLInputElement>) => {
+export class Radio extends FormControl<FormRadioProps> {
+  update = (e: React.SyntheticEvent<HTMLInputElement>, r: CheckboxProps) => {
     // this.props.owner.value = formEvent.checked;
-    this.owner.onChange(e.currentTarget.checked);
+    this.owner.onChange(r.checked);
   };
 
   render() {
     let { label, className, owner, ...rest } = this.props;
-    return <Form.Radio onChange={this.update} value={'radio'} {...rest} />;
+    let checked = this.owner.value && this.owner.value.toString() === 'true';
+
+    return <Form.Radio onChange={this.update} value={'radio'} checked={checked} {...rest} />;
   }
 }
 
 Radio.displayName = 'MobxBoundRadio';
 
 @observer
-export class Checkbox extends FormControl<FormRadioProps, {}> {
-  update = (e: React.SyntheticEvent<HTMLInputElement>) => {
+export class Checkbox extends FormControl<FormRadioProps> {
+  update = (e: React.SyntheticEvent<HTMLInputElement>, el: CheckboxProps) => {
     // this.props.owner.value = formEvent.checked;
-    this.owner.onChange(e.currentTarget.checked);
+    this.owner.onChange(el.checked);
   };
 
   render() {
     let { owner, ...rest } = this.props;
-    let checked = this.owner.value === 'true';
+    let checked = this.owner.value && this.owner.value.toString() === 'true';
     return <Form.Checkbox onChange={this.update} value={'checkbox'} checked={checked} {...rest} />;
   }
 }
