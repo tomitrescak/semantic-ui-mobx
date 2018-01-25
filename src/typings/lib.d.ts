@@ -5,3 +5,5 @@ interface Function {
     propTypes: any;
     defaultProps: any;
 }
+
+declare module 'react-datepicker';

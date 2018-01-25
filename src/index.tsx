@@ -1,8 +1,9 @@
 import * as React from 'react';
-import * as mom from 'moment';
-import { observer } from 'mobx-react';
+import * as DatePickerView from 'react-datepicker';
+import * as moment from 'moment';
+
+import { observer as typedObserver } from 'mobx-react';
 import { style } from 'typestyle';
-import i18n from 'es2015-i18n-tag';
 import {
   FormComponent,
   FormGroupProps,
@@ -19,15 +20,44 @@ import {
   CheckboxProps
 } from 'semantic-ui-react';
 
-import DatePickerView from 'react-datepicker';
 
 import { observable, IObservableArray, action } from 'mobx';
-
 export { Form as SUIForm } from 'semantic-ui-react';
+
+const dateStyle = style({
+  $nest: {
+    '.react-datepicker__input-container': {
+      width: '100%'
+    },
+    '.react-datepicker-wrapper': {
+      width: '100%'
+    }
+  }
+})
 
 export const Form = SUIForm;
 export const Field = SUIForm.Field;
 export const Group = SUIForm.Group;
+export const config = {
+  i18n: (val: TemplateStringsArray, ...keys: any[]) => {
+    let result = '';
+    for (let i=0; i < val.length; i++) {
+      result += val[i]
+
+      if (keys && keys.length) {
+        result += keys[i];
+      }
+    }
+    if (keys && keys.length) {
+      result += result[result.length - 1];
+    }
+    return result;
+  }
+}
+
+// unfortunately observer gives many errors
+const observer: any = typedObserver;
+
 
 const errorStyle = style({
   marginTop: '3px!important'
@@ -41,8 +71,6 @@ export interface FormEvent {
   type: string;
   value: any;
 }
-
-export { default as gql } from 'graphql-tag';
 
 export type Validator = (value: any, fieldName: string) => string;
 export type FieldHolder = {
@@ -148,7 +176,7 @@ export class FormState {
       let field = fields[key];
       let message = field.validate();
       if (message) {
-        this.validationMessage += i18n`Field '${field.key}': ${message}\n`;
+        this.validationMessage += config.i18n`Field '${field.key}': ${message}\n`;
       }
     }
     return this.validationMessage.trim();
@@ -325,7 +353,8 @@ export class FieldModel<T = any> {
     if (this.store == null) {
       throw new Error(`Store for key '${this.key}' does not exist`)
     }
-    return (this.store as any)[this.key];
+    let retValue = (this.store as any)[this.key];
+    return retValue == null ? '' : retValue;
   }
 
   set value(value: T) {
@@ -607,9 +636,9 @@ export class DatePicker extends FormControl<FormInputProps & DateProps> {
   };
   render() {
     const { format, placeholder, owner, ...rest } = this.props as any;
-    const moment = require('moment');
+
     return (
-      <div className="three wide field">
+      <div className={"three wide field " + dateStyle}>
         {this.props.label &&
           <label>
             {this.props.label}
@@ -674,14 +703,14 @@ Select.displayName = 'MobxBoundSelect';
 export class Radio extends FormControl<FormRadioProps> {
   update = (e: React.SyntheticEvent<HTMLInputElement>, r: CheckboxProps) => {
     // this.props.owner.value = formEvent.checked;
-    this.owner.onChange(r.checked);
+    this.owner.onChange(this.props.value);
   };
 
   render() {
-    let { label, className, owner, ...rest } = this.props;
-    let checked = this.owner.value && this.owner.value.toString() === 'true';
+    let { className, owner, ...rest } = this.props;
+    let checked = this.owner.value && this.owner.value.toString() === this.props.value;
 
-    return <Form.Radio onChange={this.update} value={'radio'} checked={checked} {...rest} />;
+    return <Form.Radio onChange={this.update} checked={checked} {...rest} />;
   }
 }
 
@@ -697,7 +726,7 @@ export class Checkbox extends FormControl<FormRadioProps> {
   render() {
     let { owner, ...rest } = this.props;
     let checked = this.owner.value && this.owner.value.toString() === 'true';
-    return <Form.Checkbox onChange={this.update} value={'checkbox'} checked={checked} {...rest} />;
+    return <Form.Checkbox onChange={this.update} checked={!!checked} {...rest} />;
   }
 }
 
@@ -706,7 +735,7 @@ Checkbox.displayName = 'MobxBoundCheckbox';
 // Fields and validators
 
 export function requiredValidator(value: string | number) {
-  return value === '' || value == null ? i18n`This field is required` : '';
+  return value === '' || value == null ? config.i18n`This field is required` : '';
 }
 
 export function regExValidator(reg: RegExp, format?: string) {
@@ -715,9 +744,9 @@ export function regExValidator(reg: RegExp, format?: string) {
       return '';
     }
     if (format) {
-      return i18n`Expecting format: ${format}`;
+      return config.i18n`Expecting format: ${format}`;
     }
-    return i18n`Unexpected format`;
+    return config.i18n`Unexpected format`;
   };
 }
 
@@ -757,38 +786,38 @@ function isEmail(n: string) {
 }
 
 export function emailValidator(value: string) {
-  return value == null || value === '' || isEmail(value) ? '' : i18n`Email has incorrect format!`;
+  return value == null || value === '' || isEmail(value) ? '' : config.i18n`Email has incorrect format!`;
 }
 
 export function intPositiveValidator(value: number | string) {
-  return value == null || value === '' || isPositiveInt(value.toString()) ? '' : i18n`Expected positive integer value`;
+  return value == null || value === '' || isPositiveInt(value.toString()) ? '' : config.i18n`Expected positive integer value`;
 }
 
 export function intValidator(value: number | string) {
-  return value == null || value === '' || isInt(value.toString()) ? '' : i18n`Expected integer value`;
+  return value == null || value === '' || isInt(value.toString()) ? '' : config.i18n`Expected integer value`;
 }
 
 export function intNonZeroValidator(value: number | string) {
-  return value == null || value === '' || isNonZeroInt(value.toString()) ? '' : i18n`Expected non-zero integer value`;
+  return value == null || value === '' || isNonZeroInt(value.toString()) ? '' : config.i18n`Expected non-zero integer value`;
 }
 
 export function floatValidator(value: number | string) {
-  return value == null || value === '' || isFloat(value.toString()) ? '' : i18n`Expected float value`;
+  return value == null || value === '' || isFloat(value.toString()) ? '' : config.i18n`Expected float value`;
 }
 
 export function floatPositiveValidator(value: number | string) {
-  return value == null || value === '' || isPositiveFloat(value.toString()) ? '' : i18n`Expected positive float value`;
+  return value == null || value === '' || isPositiveFloat(value.toString()) ? '' : config.i18n`Expected positive float value`;
 }
 
 export function floatNonZeroValidator(value: number | string) {
-  return value == null || value === '' || isNonZeroFloat(value.toString()) ? '' : i18n`Expected non-zero float value`;
+  return value == null || value === '' || isNonZeroFloat(value.toString()) ? '' : config.i18n`Expected non-zero float value`;
 }
 
 export function lengthValidator(length: number, message?: string) {
   return (value: number | string) => {
     return value == null || value === '' || value.toString().length >= length
       ? ''
-      : message || i18n`Too short! Minimum ${length} characters`;
+      : message || config.i18n`Too short! Minimum ${length} characters`;
   };
 }
 
@@ -797,6 +826,6 @@ export function equalityValidator(comparer: () => string | string, message?: str
     let val1 = value ? value.toString() : value.toString();
     let val2 = typeof comparer === 'function' ? comparer() : comparer;
 
-    return val1 === val2 ? '' : message || i18n`Value ${val1} does not match ${val2}`;
+    return val1 === val2 ? '' : message || config.i18n`Value ${val1} does not match ${val2}`;
   };
 }

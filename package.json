@@ -1,10 +1,11 @@
 {
   "name": "semantic-ui-mobx",
-  "version": "1.2.11",
+  "version": "1.3.0",
   "description": "Semantic UI elements controlled with mobx-state-tree",
   "main": "dist/index.js",
   "scripts": {
-    "test": "test"
+    "test": "test",
+    "luis": "node fuse"
   },
   "types": "dist/index.d.ts",
   "repository": {
@@ -23,20 +24,24 @@
   },
   "homepage": "https://github.com/tomitrescak/semantic-ui-mobx#readme",
   "dependencies": {
-    "moment": "^2.18.1",
-    "react-datepicker": "^0.55.0"
+    "react-datepicker": "^1.0.4"
   },
   "devDependencies": {
-    "@types/react": "^15.0.24",
-    "@types/react-datepicker": "^0.55.0",
-    "es2015-i18n-tag": "^1.1.6",
-    "graphql-tag": "^2.5.0",
+    "@types/react": "^16.0.35",
+    "connect-history-api-fallback": "^1.5.0",
+    "fuse-box": "^3.0.2",
     "mobx": "^3.2.2",
-    "mobx-react": "^4.3.2",
-    "moment": "^2.18.1",
-    "react": "^16.0.0",
-    "semantic-ui-react": "^0.74.2",
-    "tslib": "^1.7.1",
-    "typestyle": "^1.4.1"
+    "mobx-react": "^4.3.5",
+    "moment": "^2.20.1",
+    "proxyrequire": "^1.0.19",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "semantic-ui-react": "^0.77.2",
+    "tslib": "^1.9.0",
+    "typescript": "^2.6.2",
+    "typestyle": "^1.6.0"
+  },
+  "peerDependencies": {
+    "moment": "^2.20.1"
   }
 }
