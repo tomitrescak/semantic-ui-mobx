@@ -1,0 +1,6 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`fails 1`] = `
+"Field 'required': This field is required!
+Field 'badEmail': Email has incorrect format!"
+`;

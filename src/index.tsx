@@ -42,15 +42,19 @@ export const config = {
   i18n: (val: TemplateStringsArray, ...keys: any[]) => {
     let result = '';
     for (let i=0; i < val.length; i++) {
-      result += val[i]
+      if (val[i]) {
+        result += val[i];
+      }
 
-      if (keys && keys.length) {
+      if (keys && keys.length && keys[i]) {
         result += keys[i];
       }
     }
-    if (keys && keys.length) {
-      result += result[result.length - 1];
-    }
+    // if (keys && keys.length && result[result.length - 1]) {
+    //   result += keys[keys.length - 1];
+    // }
+    // console.log(keys)
+    // console.log(result)
     return result;
   }
 }
@@ -176,7 +180,7 @@ export class FormState {
       let field = fields[key];
       let message = field.validate();
       if (message) {
-        this.validationMessage += config.i18n`Field '${field.key}': ${message}\n`;
+        this.validationMessage += config.i18n`Field '${field.key}': ${message}` + '\n';
       }
     }
     return this.validationMessage.trim();
@@ -501,8 +505,8 @@ export interface FormElement {
 export class FormControl<P> extends React.Component<P & FormElement> {
   owner: FieldModel;
 
-  constructor(props: FormElement) {
-    super();
+  constructor(props: P & FormElement) {
+    super(props);
 
     if (props.owner) {
       this.owner = props.owner;
@@ -735,7 +739,7 @@ Checkbox.displayName = 'MobxBoundCheckbox';
 // Fields and validators
 
 export function requiredValidator(value: string | number) {
-  return value === '' || value == null ? config.i18n`This field is required` : '';
+  return value === '' || value == null ? config.i18n`This field is required!` : '';
 }
 
 export function regExValidator(reg: RegExp, format?: string) {
