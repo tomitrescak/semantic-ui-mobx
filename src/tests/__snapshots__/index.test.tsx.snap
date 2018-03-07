@@ -4,3 +4,9 @@ exports[`fails 1`] = `
 "Field 'required': This field is required!
 Field 'badEmail': Email has incorrect format!"
 `;
+
+
+exports[`fails 2`] = `
+"Field 'required': This field is required!
+Field 'badEmail': Email has incorrect format!"
+`;

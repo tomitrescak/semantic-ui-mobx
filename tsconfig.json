@@ -25,7 +25,8 @@
     "declaration": true,
     "plugins": [
       {
-        "name": "typescript-snapshots-plugin"
+        "name": "typescript-snapshots-plugin",
+        "snapshotCallIdentifiers": ["matchSnapshot"]
       }
     ]
   },
