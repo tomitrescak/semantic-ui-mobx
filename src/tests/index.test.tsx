@@ -17,8 +17,5 @@ it('fails', () => {
   const test = new Test();
 
   // works
-  expect(test.validate()).toMatchSnapshot();
-
-  // does not work
   test.validate().should.matchSnapshot();
 });
